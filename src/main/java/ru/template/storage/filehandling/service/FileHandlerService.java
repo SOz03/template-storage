@@ -9,6 +9,8 @@ import ru.template.storage.filehandling.service.impl.ODSFileHandler;
 import ru.template.storage.filehandling.service.impl.XLSXFileHandler;
 
 import java.io.ByteArrayOutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 @Slf4j
@@ -19,7 +21,7 @@ public class FileHandlerService {
     private final XLSXFileHandler xlsx;
     private final ODSFileHandler ods;
 
-    public ContentDto writeODS(String filename) {
+    public <T> ContentDto writeODS(RequestDto requestDto, Collection<T> collection) {
         return null;
     }
 
@@ -29,6 +31,7 @@ public class FileHandlerService {
         log.info("Get the byte stream");
 
         ContentDto dto = xlsx.download(content);
+        dto.setFilename(URLEncoder.encode(requestDto.getFilename(), StandardCharsets.UTF_8) + requestDto.getFormat().getType());
         log.info("The file is ready to be downloaded, return file {} with size {}", requestDto.getFilename(), dto.getSize());
 
         return dto;

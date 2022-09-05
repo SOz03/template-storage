@@ -45,7 +45,7 @@ public class FileHandlerController {
 
         ContentDto dto = switch (content.getFormat()) {
             case XLS, XLSX -> handlerService.writeXLS(content, list);
-            case ODS -> handlerService.writeODS(content.getFilename());
+            case ODS -> handlerService.writeODS(content, list);
         };
 
         log.info("End of file download");
