@@ -30,7 +30,7 @@ public abstract class XLSStyle {
         CellStyle style = workbook.createCellStyle();
         generalSettings(style, BorderStyle.THIN);
         style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
-//        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
         style.setFont(font);
 
         return style;
@@ -54,21 +54,10 @@ public abstract class XLSStyle {
         return style;
     }
 
-    public static CellStyle createFilterTitleStyle(XSSFWorkbook workbook) {
+    public static CellStyle commonStyle(XSSFWorkbook workbook, int fontHeight, boolean bold) {
         XSSFFont font = workbook.createFont();
-        font.setFontHeightInPoints((short) 12);
-        font.setBold(true);
-
-        CellStyle style = workbook.createCellStyle();
-        generalSettings(style, BorderStyle.NONE);
-        style.setFont(font);
-
-        return style;
-    }
-
-    public static CellStyle createFilterFieldStyle(XSSFWorkbook workbook) {
-        XSSFFont font = workbook.createFont();
-        font.setFontHeightInPoints((short) 12);
+        font.setFontHeightInPoints((short) fontHeight);
+        font.setBold(bold);
 
         CellStyle style = workbook.createCellStyle();
         generalSettings(style, BorderStyle.NONE);

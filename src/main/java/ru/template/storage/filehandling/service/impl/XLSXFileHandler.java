@@ -142,9 +142,14 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
         }
     }
 
+    /**
+     * Создание информации об условиях фильтрации данных
+     *
+     * @param <T> класс объекта, который содержит все условия поиска
+     */
     private <T> void createFilterPart(T filter) throws InvocationTargetException, IllegalAccessException {
-        CellStyle titleStyle = createFilterTitleStyle(workbook);
-        CellStyle fieldStyle = createFilterFieldStyle(workbook);
+        CellStyle titleStyle = commonStyle(workbook, 12, true);
+        CellStyle fieldStyle = commonStyle(workbook, 12, false);
 
         List<PropertyDescriptor> properties = getAccessibleProperties(filter);
 
@@ -165,6 +170,12 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
         }
     }
 
+    /**
+     * Создание заголовков таблицы. Имя поля преобразуется в текст из enum класса AllFileTitle
+     * и заносится в ячейку
+     *
+     * @param accessibleProperties список имён методов
+     */
     private void createHeaderTablePart(List<PropertyDescriptor> accessibleProperties) {
         Row row = sheet.createRow(sheet.getLastRowNum() + ROW_OFFSET + 1);
 
@@ -178,6 +189,14 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
         }
     }
 
+    /**
+     * Добавление объекта в таблицу. Каждому значению из списка присваивается своё значение,
+     * после чего создаётся новая строка и добавляется N кол-во ячеек для каждого поля
+     *
+     * @param accessibleProperties список имён методов
+     * @param id                   порядковый номер в таблице
+     * @param <T>                  класс объекта, значения полей которого заносятся в таблицу
+     */
     private <T> void addObjectInTable(List<PropertyDescriptor> accessibleProperties, T currentObject, Long id) {
         createCell(sheet.createRow(sheet.getLastRowNum() + 1).createCell(0),
                 Integer.class, id, cellTableStyle);
@@ -185,10 +204,10 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
         for (PropertyDescriptor accessibleProperty : accessibleProperties) {
             try {
                 Object value = accessibleProperty.getReadMethod().invoke(currentObject);
-                createCell(sheet.getRow(sheet.getLastRowNum())
-                                .createCell(sheet.getRow(sheet.getLastRowNum())
-                                        .getLastCellNum()),
-                        accessibleProperty.getPropertyType(), value, cellTableStyle);
+                createCell(
+                        sheet.getRow(sheet.getLastRowNum()).createCell(sheet.getRow(sheet.getLastRowNum()).getLastCellNum()),
+                        accessibleProperty.getPropertyType(),
+                        value, cellTableStyle);
             } catch (InvocationTargetException | IllegalAccessException exception) {
                 log.error("{}", exception.getMessage());
             }
