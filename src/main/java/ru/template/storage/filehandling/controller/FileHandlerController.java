@@ -37,6 +37,9 @@ public class FileHandlerController {
 
     @PostMapping(value = "/export", produces = APPLICATION_OCTET_STREAM_VALUE)
     public ResponseEntity<Resource> download(@RequestBody @Valid RequestDto content) {
+        String filename = URLEncoder.encode(content.getFilename(), StandardCharsets.UTF_8)
+                + content.getFormat().getType();
+
         log.info("Started downloading the file {}", content.getFilename());
         List<BookRecord> list = (List<BookRecord>) daoService.findAll();
 
@@ -46,19 +49,12 @@ public class FileHandlerController {
         };
 
         log.info("End of file download");
-
-        Resource resource = null;
-        if (dto != null) {
-            resource = new InputStreamResource(dto.getContent());
-        }
-        String filename = URLEncoder.encode(content.getFilename(), StandardCharsets.UTF_8)
-                + content.getFormat().getType();
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
                 .header(HttpHeaders.CONTENT_TYPE, APPLICATION_OCTET_STREAM_VALUE)
-                .contentLength(dto.getSize())
-                .body(resource);
+                .contentLength((dto != null) ? dto.getSize() : 0)
+                .body((dto != null) ? new InputStreamResource(dto.getContent()) : null);
     }
 
 }
