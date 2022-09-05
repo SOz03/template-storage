@@ -1,0 +1,74 @@
+server:
+  port: 8081
+  servlet:
+    context-path: /template-storage
+  ssl:
+    enabled: false
+
+spring:
+  main:
+    allow-circular-references: true
+  profiles:
+    active: development
+    default: development
+  application:
+    name: template-storage
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    out-of-order: true
+    locations: classpath:/db/migration
+    baseline-version: 0
+    table: tr_template_storage_schema_history
+    schemas:
+      - template_storage
+  jpa:
+    show-sql: false
+    generate-ddl: false
+    database-platform: org.hibernate.dialect.PostgreSQL10Dialect
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        show_sql: true
+        jdbc:
+          batch_size: 1000
+        order_inserts: true
+        generate_statistics: false
+        temp:
+          use_jdbc_metadata_defaults: false
+    open-in-view: false
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    disable-swagger-default-url: true
+  show-actuator: true
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+  datasource:
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/template_storage?ApplicationName=template-storage
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: test
+
+
+---
+spring:
+  config:
+    activate:
+      on-profile: production
