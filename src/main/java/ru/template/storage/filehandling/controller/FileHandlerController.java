@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.template.storage.filehandling.dto.ContentDto;
 import ru.template.storage.filehandling.dto.request.RequestDto;
 import ru.template.storage.filehandling.entity.BookRecord;
-import ru.template.storage.filehandling.service.dao.BookRecordDaoService;
 import ru.template.storage.filehandling.service.FileHandlerService;
+import ru.template.storage.filehandling.service.dao.BookRecordDaoService;
 
 import javax.validation.Valid;
 import java.net.URLEncoder;
@@ -29,7 +29,7 @@ import static org.springframework.http.MediaType.APPLICATION_OCTET_STREAM_VALUE;
 @RestController
 @RequiredArgsConstructor
 @Tag(name = "Работа с файлами Microsoft Excel и Open Document")
-@RequestMapping("/excel")
+@RequestMapping("/file-handler")
 public class FileHandlerController {
 
     private final BookRecordDaoService daoService;
