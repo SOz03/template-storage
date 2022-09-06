@@ -2,6 +2,7 @@ package ru.template.storage.filehandling.service;
 
 import ru.template.storage.filehandling.dto.ContentDto;
 import ru.template.storage.filehandling.dto.request.RequestDto;
+import ru.template.storage.filehandling.dto.templates.Template;
 
 import javax.validation.constraints.NotNull;
 import java.io.ByteArrayInputStream;
@@ -10,8 +11,8 @@ import java.util.Collection;
 
 public interface FileHandler {
 
-    <T> ByteArrayOutputStream create(@NotNull RequestDto content,
-                                     @NotNull Collection<T> collection);
+    <T extends Template> ByteArrayOutputStream create(@NotNull RequestDto content,
+                                                      @NotNull Collection<T> collection);
 
     default ContentDto download(@NotNull ByteArrayOutputStream outputStream) {
 

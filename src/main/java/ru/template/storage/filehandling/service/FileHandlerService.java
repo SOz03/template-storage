@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.template.storage.filehandling.dto.ContentDto;
 import ru.template.storage.filehandling.dto.request.RequestDto;
+import ru.template.storage.filehandling.dto.templates.Template;
 import ru.template.storage.filehandling.service.impl.ODSFileHandler;
 import ru.template.storage.filehandling.service.impl.XLSXFileHandler;
 
@@ -25,7 +26,7 @@ public class FileHandlerService {
         return null;
     }
 
-    public <T> ContentDto writeXLS(RequestDto requestDto, Collection<T> collection) {
+    public <T extends Template> ContentDto writeXLS(RequestDto requestDto, Collection<T> collection) {
         log.info("Start creating a spreadsheet with filename");
         ByteArrayOutputStream content = xlsx.create(requestDto, collection);
         log.info("Get the byte stream");

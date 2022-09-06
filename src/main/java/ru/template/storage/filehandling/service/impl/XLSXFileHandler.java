@@ -9,14 +9,18 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Service;
+import ru.template.storage.filehandling.anotation.Spreadsheet;
+import ru.template.storage.filehandling.dto.request.AccessEnum;
 import ru.template.storage.filehandling.dto.request.RequestDto;
-import ru.template.storage.filehandling.dto.titles.AllFileTitle;
+import ru.template.storage.filehandling.dto.templates.Template;
 import ru.template.storage.filehandling.service.FileHandler;
 import ru.template.storage.filehandling.service.style.XLSStyle;
 
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,8 +40,8 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
     private CellStyle headerTableStyle;
 
     @Override
-    public <T> ByteArrayOutputStream create(RequestDto content,
-                                            Collection<T> collection) {
+    public <T extends Template> ByteArrayOutputStream create(RequestDto content,
+                                                             Collection<T> collection) {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             this.workbook = workbook;
             this.sheet = workbook.createSheet(SHEET_NAME);
@@ -51,12 +55,13 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
             }
 
             T currentObject = iterator.next();
+
             List<PropertyDescriptor> accessibleProperties = getAccessibleProperties(currentObject);
 
             if (accessibleProperties != null) {
-                createHeaderPart(content, accessibleProperties.size());
+                createHeaderPart(currentObject, accessibleProperties.size());
                 createFilterPart(content.getFilter());
-                createHeaderTablePart(accessibleProperties);
+                createHeaderTablePart(accessibleProperties, currentObject);
 
                 Long totalElements = 0L;
                 while (currentObject != null) {
@@ -128,19 +133,17 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
      * Создание заголовка из N строчек, где происходит объединение колонок
      * в зависимости от размера главной таблицы
      *
-     * @param request    объект, который содержит N полей с названием заголовков
      * @param maxColumns количество объединяемых столбцов
      */
-    private void createHeaderPart(RequestDto request,
-                                  int maxColumns) {
+    private void createHeaderPart(Template template, int maxColumns) {
         CellStyle headerSheetStyle = createHeaderSheetStyle(workbook);
-
-        for (int rowIndex = 0; rowIndex < request.getHeaders().size(); rowIndex++) {
-            sheet.addMergedRegion(new CellRangeAddress(rowIndex, rowIndex, 0, maxColumns));
-            createCell(sheet.createRow(rowIndex).createCell(0), String.class, request.getHeaders().get(rowIndex),
-                    headerSheetStyle);
-        }
+        sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, maxColumns - 2));
+        createCell(sheet.createRow(0).createCell(1),
+                String.class,
+                template.getTitle(),
+                headerSheetStyle);
     }
+
 
     /**
      * Создание информации об условиях фильтрации данных
@@ -156,13 +159,18 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
         int startRow = sheet.getLastRowNum() + ROW_OFFSET + 1;
         int index = startRow;
         if (properties != null) {
+            Map<String, String> mapInfo = storingFieldNameToReplace(filter);
             for (PropertyDescriptor prop : properties) {
                 Object value = prop.getReadMethod().invoke(filter);
                 if (value != null) {
                     Row row = sheet.createRow(index);
                     createCell(row.createCell(0), String.class, "Условие поиска: ", fieldStyle);
-                    createCell(row.createCell(1), String.class, AllFileTitle.fromEng(prop.getName()).getRu(), titleStyle);
-                    createCell(row.createCell(2), String.class, value.toString(), fieldStyle);
+                    createCell(row.createCell(1), String.class, mapInfo.get(prop.getName()), titleStyle);
+
+                    String access = AccessEnum.fromType(value.toString());
+                    createCell(row.createCell(2), String.class,
+                            (access == null) ? value.toString() : access, fieldStyle);
+
                     index++;
                 }
             }
@@ -171,20 +179,22 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
     }
 
     /**
-     * Создание заголовков таблицы. Имя поля преобразуется в текст из enum класса AllFileTitle
+     * Создание заголовков таблицы. Имя поля преобразуется в текст с помощью Аннотации {@link Spreadsheet}
      * и заносится в ячейку
      *
      * @param accessibleProperties список имён методов
      */
-    private void createHeaderTablePart(List<PropertyDescriptor> accessibleProperties) {
+    private <T> void createHeaderTablePart(List<PropertyDescriptor> accessibleProperties, T object) {
         Row row = sheet.createRow(sheet.getLastRowNum() + ROW_OFFSET + 1);
 
         createCell(row.createCell(0), String.class, NAME_ID_COLUMN, headerTableStyle);
 
+        Map<String, String> mapInfo = storingFieldNameToReplace(object);
+
         for (PropertyDescriptor field : accessibleProperties) {
             sheet.setColumnWidth(row.getLastCellNum(), ALL_COLUMN_WIDTH);
             createCell(row.createCell(row.getLastCellNum()), String.class,
-                    Objects.requireNonNull(AllFileTitle.fromEng(field.getName())).getRu(),
+                    mapInfo.get(field.getName()),
                     headerTableStyle);
         }
     }
@@ -212,6 +222,21 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
                 log.error("{}", exception.getMessage());
             }
         }
+    }
+
+    private <T> Map<String, String> storingFieldNameToReplace(T object) {
+        Map<String, String> mapInfo = new HashMap<>();
+
+        Class<T> classTemplate = (Class<T>) object.getClass();
+        for (Field field : classTemplate.getDeclaredFields()) {
+            for (Annotation annotation : field.getAnnotations()) {
+                if (annotation instanceof Spreadsheet info && info.isColumn()) {
+                    mapInfo.put(field.getName(), info.name());
+                }
+            }
+        }
+
+        return mapInfo;
     }
 
 }
