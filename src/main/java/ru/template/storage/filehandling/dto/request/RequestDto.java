@@ -1,34 +1,32 @@
 package ru.template.storage.filehandling.dto.request;
 
 
-import lombok.Builder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.template.storage.filehandling.dto.templates.Template;
 
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
 import java.io.Serial;
 import java.io.Serializable;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.Collection;
 
 @Setter
 @Getter
-@Builder
-public class RequestDto implements Serializable {
+@NoArgsConstructor
+@AllArgsConstructor
+public class RequestDto<T extends Template> implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -2263811251763727994L;
 
-    @NotNull(message = "Имя файла не должно быть пустым")
-    private String filename;
-
-    @NotNull(message = "Формат файла не должно быть пустым")
+    private FilterDto filter;
     private FileFormat format;
+    Collection<T> listNeedObjects = new ArrayList<>();
 
-    private RequestSearchConditionDto filter;
-
-    @Min(1)
-    @NotNull(message = "Должен быть хоть 1 заголовок")
-    private List<String> headers;
+    @JsonIgnore
+    private TemplateInfo templateInfo;
 
 }

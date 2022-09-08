@@ -12,10 +12,12 @@ import org.springframework.stereotype.Service;
 import ru.template.storage.filehandling.anotation.Spreadsheet;
 import ru.template.storage.filehandling.dto.request.AccessEnum;
 import ru.template.storage.filehandling.dto.request.RequestDto;
+import ru.template.storage.filehandling.dto.request.TemplateInfo;
 import ru.template.storage.filehandling.dto.templates.Template;
 import ru.template.storage.filehandling.service.FileHandler;
 import ru.template.storage.filehandling.service.style.XLSStyle;
 
+import javax.validation.constraints.NotNull;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.ByteArrayOutputStream;
@@ -40,8 +42,7 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
     private CellStyle headerTableStyle;
 
     @Override
-    public <T extends Template> ByteArrayOutputStream create(RequestDto content,
-                                                             Collection<T> collection) {
+    public <T extends Template> ByteArrayOutputStream create(@NotNull RequestDto<T> content) {
         try (XSSFWorkbook workbook = new XSSFWorkbook()) {
             this.workbook = workbook;
             this.sheet = workbook.createSheet(SHEET_NAME);
@@ -49,7 +50,7 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
             cellTableStyle = createStandardTableCellsStyle(workbook);
             headerTableStyle = createHeaderTableCellsStyle(workbook);
 
-            Iterator<T> iterator = collection.iterator();
+            Iterator<T> iterator = content.getListNeedObjects().iterator();
             if (!iterator.hasNext()) {
                 return null;
             }
@@ -59,7 +60,7 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
             List<PropertyDescriptor> accessibleProperties = getAccessibleProperties(currentObject);
 
             if (accessibleProperties != null) {
-                createHeaderPart(currentObject, accessibleProperties.size());
+                createHeaderPart(currentObject, content.getTemplateInfo(), accessibleProperties.size());
                 createFilterPart(content.getFilter());
                 createHeaderTablePart(accessibleProperties, currentObject);
 
@@ -135,12 +136,17 @@ public class XLSXFileHandler extends XLSStyle implements FileHandler {
      *
      * @param maxColumns количество объединяемых столбцов
      */
-    private void createHeaderPart(Template template, int maxColumns) {
+    private <T extends Template> void createHeaderPart(T template, TemplateInfo info, int maxColumns) {
         CellStyle headerSheetStyle = createHeaderSheetStyle(workbook);
         sheet.addMergedRegion(new CellRangeAddress(0, 0, 1, maxColumns - 2));
         createCell(sheet.createRow(0).createCell(1),
                 String.class,
                 template.getTitle(),
+                headerSheetStyle);
+        sheet.addMergedRegion(new CellRangeAddress(2, 2, 1, maxColumns - 2));
+        createCell(sheet.createRow(2).createCell(1),
+                String.class,
+                info.getDescription(),
                 headerSheetStyle);
     }
 

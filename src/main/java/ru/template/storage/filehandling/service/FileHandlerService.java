@@ -10,30 +10,29 @@ import ru.template.storage.filehandling.service.impl.ODSFileHandler;
 import ru.template.storage.filehandling.service.impl.XLSXFileHandler;
 
 import java.io.ByteArrayOutputStream;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class FileHandlerService {
+public class FileHandlerService<T extends Template> {
 
     private final XLSXFileHandler xlsx;
     private final ODSFileHandler ods;
 
-    public <T> ContentDto writeODS(RequestDto requestDto, Collection<T> collection) {
+    public ContentDto writeODS(RequestDto<T> requestDto) {
         return null;
     }
 
-    public <T extends Template> ContentDto writeXLS(RequestDto requestDto, Collection<T> collection) {
+    public ContentDto writeXLS(RequestDto<T> requestDto) {
         log.info("Start creating a spreadsheet with filename");
-        ByteArrayOutputStream content = xlsx.create(requestDto, collection);
+
+        ByteArrayOutputStream content = xlsx.create(requestDto);
         log.info("Get the byte stream");
 
         ContentDto dto = xlsx.download(content);
-        dto.setFilename(URLEncoder.encode(requestDto.getFilename(), StandardCharsets.UTF_8) + requestDto.getFormat().getType());
-        log.info("The file is ready to be downloaded, return file {} with size {}", requestDto.getFilename(), dto.getSize());
+        log.info("The file is ready to be downloaded, return file {} with size {}",
+                requestDto.getTemplateInfo().getFilename(), dto.getSize());
 
         return dto;
     }

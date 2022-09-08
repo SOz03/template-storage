@@ -11,8 +11,7 @@ import java.util.Collection;
 
 public interface FileHandler {
 
-    <T extends Template> ByteArrayOutputStream create(@NotNull RequestDto content,
-                                                      @NotNull Collection<T> collection);
+    <T extends Template> ByteArrayOutputStream create(@NotNull RequestDto<T> content);
 
     default ContentDto download(@NotNull ByteArrayOutputStream outputStream) {
 

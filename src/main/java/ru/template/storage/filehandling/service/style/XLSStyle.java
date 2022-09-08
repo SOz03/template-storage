@@ -10,7 +10,7 @@ import java.util.List;
 
 public abstract class XLSStyle {
 
-    public static final int ROW_OFFSET = 2;
+    public static final int ROW_OFFSET = 1;
 
     public static final String NAME_ID_COLUMN = "№ п.п.";
 

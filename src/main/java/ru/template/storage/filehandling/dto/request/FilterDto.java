@@ -11,7 +11,7 @@ import java.io.Serializable;
 @Setter
 @Getter
 @Builder
-public class RequestSearchConditionDto implements Serializable {
+public class FilterDto implements Serializable {
 
     @Serial
     private static final long serialVersionUID = -8268427940442806288L;

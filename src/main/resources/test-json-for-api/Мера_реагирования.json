@@ -1,0 +1,53 @@
+{
+  "filter": {
+    "office": "ALL",
+    "region": "ALL",
+    "division": "ALL",
+    "regionalCity": "Москва"
+  },
+  "format": "XLS",
+  "listNeedObjects": [
+    {
+        "responseMeasure": "мера реагирования 1",
+        "dateResponseActionTaken": "2022-01-01",
+        "agency": "Ведомство 1",
+        "region": "Самарская область",
+        "executorDocument": "Иванов Иван Ivanovich 1",
+        "numberViolations": "0",
+        "actuallyEliminated": "0",
+        "dateConsideration": "2022-01-02",
+        "considerationResult": "всё отлично",
+        "numberPersonsBroughtJustice": "2",
+        "managers": "1",
+        "card": "AБ021В2411В10001"
+      },
+	  {
+        "responseMeasure": "мера реагирования 2",
+        "dateResponseActionTaken": "2022-01-02",
+        "agency": "Ведомство 2",
+        "region": "Самарская область",
+        "executorDocument": "Иванов Иван Ivanovich 2",
+        "numberViolations": "0",
+        "actuallyEliminated": "0",
+        "dateConsideration": "2022-01-03",
+        "considerationResult": "всё отлично",
+        "numberPersonsBroughtJustice": "4",
+        "managers": "2",
+        "card": "AБ021В2411В10002"
+      },
+	  {
+        "responseMeasure": "мера реагирования 3",
+        "dateResponseActionTaken": "2022-01-03",
+        "agency": "Ведомство 3",
+        "region": "Самарская область",
+        "executorDocument": "Иванов Иван Ivanovich 3",
+        "numberViolations": "3",
+        "actuallyEliminated": "1",
+        "dateConsideration": "2022-01-03",
+        "considerationResult": "всё отлично",
+        "numberPersonsBroughtJustice": "0",
+        "managers": "0",
+        "card": "AБ021В2411В10003"
+      }
+  ]
+}
